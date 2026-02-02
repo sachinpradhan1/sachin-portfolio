@@ -1,6 +1,51 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import { Play, ArrowRight } from 'lucide-react';
+import { Play, ArrowRight, Camera, Lock, Unlock } from 'lucide-react';
+import { CLOUDINARY_CONFIG } from '@/lib/cloudinary';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
+// Admin password - same as video section
+const ADMIN_PASSWORD = '@Sachin889900';
+
+// Load hero image from localStorage
+const loadHeroImage = (): string => {
+  try {
+    const saved = localStorage.getItem('portfolio_hero_image');
+    return saved || '/hero-profile.jpg';
+  } catch {
+    return '/hero-profile.jpg';
+  }
+};
+
+// Declare the Cloudinary widget type
+declare global {
+  interface Window {
+    cloudinary: {
+      createUploadWidget: (
+        config: {
+          cloudName: string;
+          uploadPreset: string;
+          sources: string[];
+          multiple: boolean;
+          resourceType: string;
+          maxFileSize: number;
+          clientAllowedFormats: string[];
+          cropping?: boolean;
+          croppingAspectRatio?: number;
+        },
+        callback: (error: Error | null, result: { event: string; info: { secure_url: string; public_id: string } }) => void
+      ) => { open: () => void };
+    };
+  }
+}
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -9,6 +54,30 @@ const Hero = () => {
   const buttonsRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<HTMLCanvasElement>(null);
+
+  const [heroImage, setHeroImage] = useState<string>(loadHeroImage);
+  const [isAdminMode, setIsAdminMode] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Save hero image to localStorage
+  useEffect(() => {
+    if (heroImage !== '/hero-profile.jpg') {
+      localStorage.setItem('portfolio_hero_image', heroImage);
+    }
+  }, [heroImage]);
+
+  // Load Cloudinary script
+  useEffect(() => {
+    if (!document.querySelector('script[src*="cloudinary"]')) {
+      const script = document.createElement('script');
+      script.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -160,6 +229,60 @@ const Hero = () => {
     return () => ctx.revert();
   }, []);
 
+  const handlePasswordSubmit = () => {
+    if (passwordInput === ADMIN_PASSWORD) {
+      setIsAdminMode(true);
+      localStorage.setItem('portfolio_admin_mode', 'true');
+      setShowPasswordDialog(false);
+      setPasswordInput('');
+      setPasswordError('');
+    } else {
+      setPasswordError('Incorrect password');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAdminMode(false);
+    localStorage.setItem('portfolio_admin_mode', 'false');
+  };
+
+  const openCloudinaryWidget = () => {
+    if (!window.cloudinary) {
+      alert('Cloudinary widget is still loading. Please try again.');
+      return;
+    }
+
+    setIsUploading(true);
+
+    const widget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: CLOUDINARY_CONFIG.cloudName,
+        uploadPreset: CLOUDINARY_CONFIG.uploadPreset,
+        sources: ['local', 'url', 'camera'],
+        multiple: false,
+        resourceType: 'image',
+        maxFileSize: 10000000, // 10MB
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
+        cropping: true,
+        croppingAspectRatio: 3 / 4,
+      },
+      (error, result) => {
+        if (error) {
+          console.error('Upload error:', error);
+          setIsUploading(false);
+          return;
+        }
+
+        if (result.event === 'success') {
+          setHeroImage(result.info.secure_url);
+          setIsUploading(false);
+        }
+      }
+    );
+
+    widget.open();
+  };
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -202,6 +325,61 @@ const Hero = () => {
           className="animate-pulse"
         />
       </svg>
+
+      {/* Admin Toggle - Top Right */}
+      <div className="absolute top-4 right-4 z-50">
+        {!isAdminMode ? (
+          <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 bg-black/50"
+              >
+                <Lock size={14} className="mr-2" />
+                Admin
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#1A1A1A] border-gray-700 text-white">
+              <DialogHeader>
+                <DialogTitle>Admin Access</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 pt-4">
+                <div>
+                  <label className="text-sm text-gray-400 mb-2 block">Enter Password</label>
+                  <Input
+                    type="password"
+                    value={passwordInput}
+                    onChange={(e) => setPasswordInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
+                    placeholder="Enter admin password"
+                    className="bg-black border-gray-700 text-white"
+                  />
+                  {passwordError && (
+                    <p className="text-red-500 text-sm mt-2">{passwordError}</p>
+                  )}
+                </div>
+                <Button
+                  onClick={handlePasswordSubmit}
+                  className="w-full bg-red-600 hover:bg-red-700"
+                >
+                  Unlock
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 bg-black/50"
+          >
+            <Unlock size={14} className="mr-2" />
+            Logout
+          </Button>
+        )}
+      </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
@@ -265,10 +443,21 @@ const Hero = () => {
             {/* Image Container */}
             <div className="relative group">
               <img
-                src="/hero-profile.jpg"
+                src={heroImage}
                 alt="Sachin Pradhan"
                 className="relative z-10 w-full max-w-sm lg:max-w-md object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
               />
+
+              {/* Admin Edit Button */}
+              {isAdminMode && (
+                <button
+                  onClick={openCloudinaryWidget}
+                  disabled={isUploading}
+                  className="absolute bottom-4 right-4 z-20 bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+                >
+                  <Camera size={20} />
+                </button>
+              )}
 
               {/* Red Accent Border */}
               <div className="absolute -inset-2 border-2 border-red-600/30 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

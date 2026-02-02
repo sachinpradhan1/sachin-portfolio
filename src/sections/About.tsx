@@ -1,15 +1,92 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Mic, Video, Users, MessageSquare, FileText } from 'lucide-react';
+import { Mic, Video, Users, MessageSquare, FileText, Camera } from 'lucide-react';
+import { CLOUDINARY_CONFIG } from '@/lib/cloudinary';
 
 gsap.registerPlugin(ScrollTrigger);
+
+// Admin password - same as other sections
+const ADMIN_PASSWORD = '@Sachin889900';
+
+// Load about image from localStorage
+const loadAboutImage = (): string => {
+  try {
+    const saved = localStorage.getItem('portfolio_about_image');
+    return saved || '/about-portrait.jpg';
+  } catch {
+    return '/about-portrait.jpg';
+  }
+};
+
+// Check if admin mode is active (shared with Hero)
+const isAdminActive = (): boolean => {
+  try {
+    return localStorage.getItem('portfolio_admin_mode') === 'true';
+  } catch {
+    return false;
+  }
+};
+
+// Declare the Cloudinary widget type
+declare global {
+  interface Window {
+    cloudinary: {
+      createUploadWidget: (
+        config: {
+          cloudName: string;
+          uploadPreset: string;
+          sources: string[];
+          multiple: boolean;
+          resourceType: string;
+          maxFileSize: number;
+          clientAllowedFormats: string[];
+          cropping?: boolean;
+          croppingAspectRatio?: number;
+        },
+        callback: (error: Error | null, result: { event: string; info: { secure_url: string; public_id: string } }) => void
+      ) => { open: () => void };
+    };
+  }
+}
 
 const About = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
 
+  const [aboutImage, setAboutImage] = useState<string>(loadAboutImage);
+  const [isAdminMode, setIsAdminMode] = useState(isAdminActive);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Listen for admin mode changes from Hero section
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsAdminMode(localStorage.getItem('portfolio_admin_mode') === 'true');
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also check periodically for same-tab updates
+    const interval = setInterval(() => {
+      const currentAdminState = localStorage.getItem('portfolio_admin_mode') === 'true';
+      if (currentAdminState !== isAdminMode) {
+        setIsAdminMode(currentAdminState);
+      }
+    }, 500);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [isAdminMode]);
+
+  // Save about image to localStorage
+  useEffect(() => {
+    if (aboutImage !== '/about-portrait.jpg') {
+      localStorage.setItem('portfolio_about_image', aboutImage);
+    }
+  }, [aboutImage]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -54,12 +131,47 @@ const About = () => {
           }
         );
       }
-
-
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
+
+  const openCloudinaryWidget = () => {
+    if (!window.cloudinary) {
+      alert('Cloudinary widget is still loading. Please try again.');
+      return;
+    }
+
+    setIsUploading(true);
+
+    const widget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: CLOUDINARY_CONFIG.cloudName,
+        uploadPreset: CLOUDINARY_CONFIG.uploadPreset,
+        sources: ['local', 'url', 'camera'],
+        multiple: false,
+        resourceType: 'image',
+        maxFileSize: 10000000, // 10MB
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp'],
+        cropping: true,
+        croppingAspectRatio: 3 / 4,
+      },
+      (error, result) => {
+        if (error) {
+          console.error('Upload error:', error);
+          setIsUploading(false);
+          return;
+        }
+
+        if (result.event === 'success') {
+          setAboutImage(result.info.secure_url);
+          setIsUploading(false);
+        }
+      }
+    );
+
+    widget.open();
+  };
 
   const skills = [
     { icon: Mic, label: 'Public Speaking' },
@@ -68,8 +180,6 @@ const About = () => {
     { icon: MessageSquare, label: 'Brand Communication' },
     { icon: FileText, label: 'Scriptwriting' },
   ];
-
-
 
   return (
     <section
@@ -103,17 +213,28 @@ const About = () => {
             <div className="relative group">
               {/* Glow Effect */}
               <div className="absolute inset-0 bg-red-600/10 rounded-2xl blur-3xl scale-110" />
-              
+
               {/* Main Image */}
               <div className="relative overflow-hidden rounded-2xl">
                 <img
-                  src="/about-portrait.jpg"
+                  src={aboutImage}
                   alt="Sachin Pradhan"
                   className="w-full max-w-md mx-auto object-contain transition-transform duration-700 group-hover:scale-105"
                 />
-                
+
+                {/* Admin Edit Button */}
+                {isAdminMode && (
+                  <button
+                    onClick={openCloudinaryWidget}
+                    disabled={isUploading}
+                    className="absolute bottom-4 right-4 z-20 bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110"
+                  >
+                    <Camera size={20} />
+                  </button>
+                )}
+
                 {/* Overlay on hover */}
-                <div className="absolute inset-0 bg-gradient-to-t from-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               </div>
 
               {/* Corner Accents */}
@@ -133,7 +254,7 @@ const About = () => {
           {/* Right Column - Content */}
           <div ref={contentRef} className="order-1 lg:order-2">
             <span className="reveal-item section-label mb-4 block">ABOUT ME</span>
-            
+
             <h2 className="reveal-item text-4xl sm:text-5xl font-bold text-white mb-6 font-['Montserrat']">
               Creator. Speaker.{' '}
               <span className="text-red-600">Storyteller.</span>
@@ -141,14 +262,14 @@ const About = () => {
 
             <div className="reveal-item space-y-4 text-gray-400 text-lg leading-relaxed mb-8">
               <p>
-                I'm Sachin Pradhan, a content creator and public speaker who turns 
-                ideas into engaging stories. With confidence in front of the camera 
-                and a passion for authentic connection, I help brands communicate their 
+                I'm Sachin Pradhan, a content creator and public speaker who turns
+                ideas into engaging stories. With confidence in front of the camera
+                and a passion for authentic connection, I help brands communicate their
                 message while building communities that care.
               </p>
               <p>
-                Every piece of content I create is designed to resonate, engage, and 
-                inspire action. Whether it's a brand collaboration or a stage presentation, 
+                Every piece of content I create is designed to resonate, engage, and
+                inspire action. Whether it's a brand collaboration or a stage presentation,
                 I bring energy, professionalism, and a unique voice that stands out.
               </p>
             </div>
@@ -167,8 +288,6 @@ const About = () => {
             </div>
           </div>
         </div>
-
-
       </div>
     </section>
   );

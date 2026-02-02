@@ -1,19 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import { Play, ArrowRight, Camera, Lock, Unlock } from 'lucide-react';
+import { Play, ArrowRight, Camera } from 'lucide-react';
 import { CLOUDINARY_CONFIG } from '@/lib/cloudinary';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 
-// Admin password - same as video section
-const ADMIN_PASSWORD = '@Sachin889900';
+
+
 
 // Load hero image from localStorage
 const loadHeroImage = (): string => {
@@ -57,9 +48,6 @@ const Hero = () => {
 
   const [heroImage, setHeroImage] = useState<string>(loadHeroImage);
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordError, setPasswordError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
 
   // Save hero image to localStorage
@@ -229,22 +217,21 @@ const Hero = () => {
     return () => ctx.revert();
   }, []);
 
-  const handlePasswordSubmit = () => {
-    if (passwordInput === ADMIN_PASSWORD) {
-      setIsAdminMode(true);
-      localStorage.setItem('portfolio_admin_mode', 'true');
-      setShowPasswordDialog(false);
-      setPasswordInput('');
-      setPasswordError('');
-    } else {
-      setPasswordError('Incorrect password');
-    }
-  };
+  // Listen for admin mode changes from Navigation
+  useEffect(() => {
+    const checkAdminMode = () => {
+      const adminState = localStorage.getItem('portfolio_admin_mode') === 'true';
+      setIsAdminMode(adminState);
+    };
 
-  const handleLogout = () => {
-    setIsAdminMode(false);
-    localStorage.setItem('portfolio_admin_mode', 'false');
-  };
+    // Check on mount
+    checkAdminMode();
+
+    // Poll for changes
+    const interval = setInterval(checkAdminMode, 500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const openCloudinaryWidget = () => {
     if (!window.cloudinary) {
@@ -326,60 +313,6 @@ const Hero = () => {
         />
       </svg>
 
-      {/* Admin Toggle - Top Right */}
-      <div className="absolute top-4 right-4 z-50">
-        {!isAdminMode ? (
-          <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 bg-black/50"
-              >
-                <Lock size={14} className="mr-2" />
-                Admin
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="bg-[#1A1A1A] border-gray-700 text-white">
-              <DialogHeader>
-                <DialogTitle>Admin Access</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div>
-                  <label className="text-sm text-gray-400 mb-2 block">Enter Password</label>
-                  <Input
-                    type="password"
-                    value={passwordInput}
-                    onChange={(e) => setPasswordInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handlePasswordSubmit()}
-                    placeholder="Enter admin password"
-                    className="bg-black border-gray-700 text-white"
-                  />
-                  {passwordError && (
-                    <p className="text-red-500 text-sm mt-2">{passwordError}</p>
-                  )}
-                </div>
-                <Button
-                  onClick={handlePasswordSubmit}
-                  className="w-full bg-red-600 hover:bg-red-700"
-                >
-                  Unlock
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        ) : (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleLogout}
-            className="border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 bg-black/50"
-          >
-            <Unlock size={14} className="mr-2" />
-            Logout
-          </Button>
-        )}
-      </div>
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">

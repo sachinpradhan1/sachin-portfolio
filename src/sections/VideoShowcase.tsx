@@ -49,9 +49,9 @@ const defaultVideos: Video[] = [
     id: '3',
     title: 'Sample 3',
     platform: 'cloudinary',
-    embedUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/v1770265847/psk6s1lbishfninprh6x.mp4',
-    cloudinaryPublicId: 'psk6s1lbishfninprh6x',
-    thumbnailUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/so_0,w_800,h_450,c_fill/psk6s1lbishfninprh6x.jpg',
+    embedUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/v1770266571/hz0alaayxd5rn2qj13la.mp4',
+    cloudinaryPublicId: 'hz0alaayxd5rn2qj13la',
+    thumbnailUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/so_0,w_800,h_450,c_fill/hz0alaayxd5rn2qj13la.jpg',
   },
   {
     id: '4',

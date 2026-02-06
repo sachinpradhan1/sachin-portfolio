@@ -27,21 +27,39 @@ interface Video {
 // Admin password - change this to your own secret password
 const ADMIN_PASSWORD = '@Sachin889900';
 
-// Default videos data
+// Default videos data - Cloudinary hosted videos (visible on all devices)
 const defaultVideos: Video[] = [
   {
     id: '1',
-    title: 'Samsung Galaxy S25 Campaign',
-    platform: 'youtube',
-    embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    thumbnailUrl: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+    title: 'Sample 1',
+    platform: 'cloudinary',
+    embedUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/v1770050881/mc4kfmg3irefn2ujkl2i.mp4',
+    cloudinaryPublicId: 'mc4kfmg3irefn2ujkl2i',
+    thumbnailUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/so_0,w_800,h_450,c_fill/mc4kfmg3irefn2ujkl2i.jpg',
   },
   {
     id: '2',
-    title: 'Brand Collaboration Reel',
-    platform: 'instagram',
-    embedUrl: 'https://www.instagram.com/reel/EXAMPLE/embed',
-    thumbnailUrl: 'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=800&h=450&fit=crop',
+    title: 'Sample 2',
+    platform: 'cloudinary',
+    embedUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/v1770051225/onhppuqoownikerpffpm.mp4',
+    cloudinaryPublicId: 'onhppuqoownikerpffpm',
+    thumbnailUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/so_0,w_800,h_450,c_fill/onhppuqoownikerpffpm.jpg',
+  },
+  {
+    id: '3',
+    title: 'Sample 3',
+    platform: 'cloudinary',
+    embedUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/v1770265847/psk6s1lbishfninprh6x.mp4',
+    cloudinaryPublicId: 'psk6s1lbishfninprh6x',
+    thumbnailUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/so_0,w_800,h_450,c_fill/psk6s1lbishfninprh6x.jpg',
+  },
+  {
+    id: '4',
+    title: 'Sample 4',
+    platform: 'cloudinary',
+    embedUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/v1770390945/VID_20260206_043417_175_bsl_lgxza8.mp4',
+    cloudinaryPublicId: 'VID_20260206_043417_175_bsl_lgxza8',
+    thumbnailUrl: 'https://res.cloudinary.com/diaj4r0ie/video/upload/so_0,w_800,h_450,c_fill/VID_20260206_043417_175_bsl_lgxza8.jpg',
   },
 ];
 

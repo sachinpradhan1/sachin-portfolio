@@ -371,15 +371,17 @@ const Hero = () => {
         >
           <div className="relative float-animation">
             {/* Glow Effect */}
-            <div className="absolute inset-0 bg-red-600/20 rounded-2xl blur-3xl scale-110 pulse-glow" />
+            <div className="absolute inset-0 bg-red-600/30 rounded-full blur-3xl scale-110 pulse-glow" />
 
-            {/* Image Container */}
+            {/* Image Container - Circular */}
             <div className="relative group">
-              <img
-                src={heroImage}
-                alt="Sachin Pradhan"
-                className="relative z-10 w-full max-w-sm lg:max-w-md object-contain drop-shadow-2xl transition-transform duration-500 group-hover:scale-105"
-              />
+              <div className="w-72 h-72 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full overflow-hidden border-4 border-red-600/50 shadow-2xl shadow-red-600/20">
+                <img
+                  src={heroImage}
+                  alt="Sachin Pradhan"
+                  className="relative z-10 w-full h-full object-cover object-top drop-shadow-2xl transition-transform duration-500 group-hover:scale-110"
+                />
+              </div>
 
               {/* Admin Edit Button */}
               {isAdminMode && (
@@ -392,12 +394,11 @@ const Hero = () => {
                 </button>
               )}
 
-              {/* Red Accent Border */}
-              <div className="absolute -inset-2 border-2 border-red-600/30 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              {/* Circular Accent Border */}
+              <div className="absolute -inset-3 border-2 border-red-600/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              {/* Corner Accents */}
-              <div className="absolute -top-4 -left-4 w-8 h-8 border-t-2 border-l-2 border-red-600" />
-              <div className="absolute -bottom-4 -right-4 w-8 h-8 border-b-2 border-r-2 border-red-600" />
+              {/* Decorative Ring */}
+              <div className="absolute -inset-6 border border-red-600/20 rounded-full animate-pulse" />
             </div>
           </div>
         </div>

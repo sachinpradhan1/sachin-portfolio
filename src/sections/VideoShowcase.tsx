@@ -73,25 +73,7 @@ const loadVideos = (): Video[] => {
   }
 };
 
-// Declare the Cloudinary widget type
-declare global {
-  interface Window {
-    cloudinary: {
-      createUploadWidget: (
-        config: {
-          cloudName: string;
-          uploadPreset: string;
-          sources: string[];
-          multiple: boolean;
-          resourceType: string;
-          maxFileSize: number;
-          clientAllowedFormats: string[];
-        },
-        callback: (error: Error | null, result: { event: string; info: { secure_url: string; public_id: string } }) => void
-      ) => { open: () => void };
-    };
-  }
-}
+// Note: Cloudinary widget type is declared in About.tsx
 
 const VideoShowcase = () => {
   const sectionRef = useRef<HTMLDivElement>(null);

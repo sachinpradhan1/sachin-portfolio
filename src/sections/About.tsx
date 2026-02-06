@@ -6,9 +6,6 @@ import { CLOUDINARY_CONFIG } from '@/lib/cloudinary';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Admin password - same as other sections
-const ADMIN_PASSWORD = '@Sachin889900';
-
 // Load about image from localStorage
 const loadAboutImage = (): string => {
   try {

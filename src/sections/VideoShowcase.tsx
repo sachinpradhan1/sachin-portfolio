@@ -63,23 +63,14 @@ const defaultVideos: Video[] = [
   },
 ];
 
-// Load videos from localStorage if available
-const loadVideos = (): Video[] => {
-  try {
-    const saved = localStorage.getItem('portfolio_videos');
-    return saved ? JSON.parse(saved) : defaultVideos;
-  } catch {
-    return defaultVideos;
-  }
-};
-
 // Note: Cloudinary widget type is declared in About.tsx
 
 const VideoShowcase = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
-  const [videos, setVideos] = useState<Video[]>(loadVideos);
+  // Always use the default Cloudinary videos - no localStorage loading
+  const [videos, setVideos] = useState<Video[]>(defaultVideos);
   const [editingVideo, setEditingVideo] = useState<Video | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);

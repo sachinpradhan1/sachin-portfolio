@@ -446,20 +446,14 @@ const VideoShowcase = () => {
                 <Dialog>
                   <DialogTrigger asChild>
                     <div className="relative cursor-pointer">
-                      {video.platform === 'cloudinary' ? (
-                        <video
-                          src={video.embedUrl}
-                          className="w-full h-full object-cover"
-                          muted
-                          preload="metadata"
-                        />
-                      ) : (
-                        <img
-                          src={video.thumbnailUrl}
-                          alt={video.title}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                      )}
+                      {/* Always use thumbnail image for preview */}
+                      <img
+                        src={video.thumbnailUrl || (video.platform === 'cloudinary'
+                          ? video.embedUrl.replace('/video/upload/', '/video/upload/so_0,w_800,h_450,c_fill/').replace('.mp4', '.jpg')
+                          : video.embedUrl)}
+                        alt={video.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center transform scale-0 group-hover:scale-100 transition-transform duration-300">
                           <Play size={28} className="text-white ml-1" fill="white" />
